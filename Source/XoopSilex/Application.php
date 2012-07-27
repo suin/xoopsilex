@@ -4,6 +4,8 @@ namespace XoopSilex;
 
 use \XCube_Root;
 use \XoopSilex\ModuleResponse;
+use \Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent;
+use \Symfony\Component\HttpFoundation\Response;
 
 class Application extends \Silex\Application
 {
@@ -17,13 +19,10 @@ class Application extends \Silex\Application
 		$this['debug'] = ( $root->mContext->mXoopsConfig['debug_mode'] > 0 );
 	}
 
-	/**
-	 * Return ModuleResponse object
-	 * @param string   $data    The response data
-	 * @return \XoopSilex\ModuleResponse
-	 */
-	public function moduleResponse($data)
+	public function onKernelView(GetResponseForControllerResultEvent $event)
 	{
-		return new ModuleResponse($data);
+		$response = $event->getControllerResult();
+		$response = $response instanceof Response ? $response : new ModuleResponse((string) $response);
+		$event->setResponse($response);
 	}
 }
